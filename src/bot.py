@@ -1,14 +1,11 @@
-#import logging
+import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 from services.exchange_rate import get_baht_to_ruble, get_usdt_to_baht
 
-# Настройка логирования
-#logging.basicConfig(
-#    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#    level=logging.INFO
-#)
-#logger = logging.getLogger(__name__)
+token = os.getenv("TELEGRAM_BOT_TOKEN")
+if not token:
+    raise ValueError("Переменная окружения TELEGRAM_BOT_TOKEN не установлена.")
 
 async def start(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text('Привет! Напишите "курс", чтобы получить актуальный курс.')
@@ -24,7 +21,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         await get_exchange_rates(update, context)
 
 def main() -> None:
-    application = Application.builder().token(TOKEN).build()
+    application = Application.builder().token(token).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
